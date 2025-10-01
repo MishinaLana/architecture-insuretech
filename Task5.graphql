@@ -1,0 +1,156 @@
+# GraphQL Schema для сервиса управления клиентскими данными (client-info)
+# Версия: 1.0.0
+
+# Клиент
+type Client {
+  id: ID!
+  name: String!
+  age: Int
+  documents: [Document!]!
+  relatives: [Relative!]!
+}
+
+# Документ
+type Document {
+  id: ID!
+  type: String!
+  number: String!
+  issueDate: String
+  expiryDate: String
+}
+
+# Родственник
+type Relative {
+  id: ID!
+  relationType: String!
+  name: String!
+  age: Int
+}
+
+# Результат выполнения действия
+type ActionResult {
+  success: Boolean!
+  message: String
+  code: String
+}
+
+# Событие создания клиента
+type ClientCreatedEvent {
+  client: Client!
+  timestamp: String!
+}
+
+# Событие обновления клиента
+type ClientUpdatedEvent {
+  client: Client!
+  timestamp: String!
+}
+
+# Событие добавления документа
+type DocumentAddedEvent {
+  document: Document!
+  clientId: ID!
+  timestamp: String!
+}
+
+# Событие удаления документа
+type DocumentRemovedEvent {
+  documentId: ID!
+  clientId: ID!
+  timestamp: String!
+}
+
+# Событие добавления родственника
+type RelativeAddedEvent {
+  relative: Relative!
+  clientId: ID!
+  timestamp: String!
+}
+
+# Событие удаления родственника
+type RelativeRemovedEvent {
+  relativeId: ID!
+  clientId: ID!
+  timestamp: String!
+}
+
+# Запросы
+type Query {
+  # Получить информацию о клиенте по ID
+  client(id: ID!): Client
+
+  # Получить список документов клиента
+  documents(clientId: ID!): [Document!]!
+
+  # Получить информацию о родственниках клиента
+  relatives(clientId: ID!): [Relative!]!
+
+  # Поиск клиентов по имени (расширенная функциональность)
+  clientsByName(name: String!): [Client!]!
+}
+
+# Действия
+type Mutation {
+  # Создать нового клиента
+  createClient(input: CreateClientInput!): ClientCreatedEvent!
+
+  # Обновить информацию о клиенте
+  updateClient(id: ID!, input: UpdateClientInput!): ClientUpdatedEvent!
+
+  # Добавить документ клиенту
+  addDocument(clientId: ID!, input: DocumentInput!): DocumentAddedEvent!
+
+  # Удалить документ
+  removeDocument(id: ID!): DocumentRemovedEvent!
+
+  # Добавить родственника
+  addRelative(clientId: ID!, input: RelativeInput!): RelativeAddedEvent!
+
+  # Удалить родственника
+  removeRelative(id: ID!): RelativeRemovedEvent!
+}
+
+# Входные данные для создания клиента
+input CreateClientInput {
+  name: String!
+  age: Int
+}
+
+# Входные данные для обновления клиента
+input UpdateClientInput {
+  name: String
+  age: Int
+}
+
+# Входные данные для документа
+input DocumentInput {
+  type: String!
+  number: String!
+  issueDate: String
+  expiryDate: String
+}
+
+# Входные данные для родственника
+input RelativeInput {
+  relationType: String!
+  name: String!
+  age: Int
+}
+
+# Подписки (для real-time обновлений)
+type Subscription {
+  # Подписка на изменения клиента
+  clientUpdated(id: ID!): ClientUpdatedEvent
+
+  # Подписка на новые документы клиента
+  documentAdded(clientId: ID!): DocumentAddedEvent
+
+  # Подписка на новые родственники клиента
+  relativeAdded(clientId: ID!): RelativeAddedEvent
+
+  # Подписка на удаление документов
+  documentRemoved(clientId: ID!): DocumentRemovedEvent
+
+  # Подписка на удаление родственников
+  relativeRemoved(clientId: ID!): RelativeRemovedEvent
+}
